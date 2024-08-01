@@ -23,6 +23,7 @@ if (-not (Test-Path -Path $cloneDirectory)) {
 
 
 # Get repositories the specified team has access to
+Write-Output "Starting to search for $searchWord in $orgOrUser for the team $teamSlug and clone any matches to $cloneDirectory ..."
 Start-Sleep -Seconds 5
 $repos = gh api --paginate -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/$orgOrUser/teams/$teamSlug/repos --jq '.[]|.full_name'
 
