@@ -1,9 +1,15 @@
-# Define the search word, organization, team, and clone directory
-$searchWord = ""  # Replace with the word you want to search for
-$orgOrUser = ""   # Replace with the organization or user you want to search within
-$cloneDirectory = ""  # Replace with the path to the directory where you want to clone the repositories
-$teamSlug = ""      # Replace with the team's slug
+param (
+    [string]$searchWord,
+    [string]$orgOrUser,
+    [string]$cloneDirectory,
+    [string]$teamSlug
+)
 
+# Check if all required parameters are provided
+if (-not $searchWord -or -not $orgOrUser -or -not $cloneDirectory -or -not $teamSlug) {
+    Write-Error "Missing arguments. Usage: script.ps1 -searchWord <Word> -orgOrUser <Organization/User> -cloneDirectory <Directory> -teamSlug <TeamSlug>"
+    exit 1
+}
 
 # Ensure the clone directory exists
 if (-not (Test-Path -Path $cloneDirectory)) {
@@ -15,12 +21,12 @@ if (-not (Test-Path -Path $cloneDirectory)) {
     }
 }
 
-Start-Sleep -Seconds 5
+
 # Get repositories the specified team has access to
+Start-Sleep -Seconds 5
 $repos = gh api --paginate -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/$orgOrUser/teams/$teamSlug/repos --jq '.[]|.full_name'
 
 foreach ($repo in $repos) {
-    
     try {
         Write-Output "Waiting to search $repo..."
         Start-Sleep -Seconds 5
@@ -32,7 +38,7 @@ foreach ($repo in $repos) {
             Start-Sleep -Seconds 5
             # If results are found, clone the repository
             Write-Output "Cloning repository $repo..."
-            gh repo clone $repo "$cloneDirectory\$($repo -replace '/','-')"
+            gh repo clone $repo "$cloneDirectory\$($repo -replace '/', '-')"
             Write-Output "Cloned $repo cooling down..."
         } else {
             Write-Output "Nothing found cooling down..."
