@@ -10,11 +10,14 @@ if (-not $searchWord -or -not $orgOrUser -or -not $cloneDirectory -or -not $team
     Write-Error "Missing arguments. Usage: script.ps1 -searchWord <Word> -orgOrUser <Organization/User> -cloneDirectory <Directory> -teamSlug <TeamSlug>"
     exit 1
 }
-
+Write-Output "Starting to search for $searchWord in $orgOrUser for the team $teamSlug and clone any matches to $cloneDirectory ..."
+Start-Sleep -Seconds 5
 # Ensure the clone directory exists
 if (-not (Test-Path -Path $cloneDirectory)) {
     try {
-        New-Item -ItemType Directory -Path $cloneDirectory -ErrorAction Stop
+        Write-Output "Creating Directory.."
+        $hideOutput = New-Item -ItemType Directory -Path $cloneDirectory -ErrorAction Stop
+        
     } catch {
         Write-Error "Failed to create clone directory at '$cloneDirectory'. Error: $_"
         exit 1
@@ -23,8 +26,7 @@ if (-not (Test-Path -Path $cloneDirectory)) {
 
 
 # Get repositories the specified team has access to
-Write-Output "Starting to search for $searchWord in $orgOrUser for the team $teamSlug and clone any matches to $cloneDirectory ..."
-Start-Sleep -Seconds 5
+
 $repos = gh api --paginate -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/$orgOrUser/teams/$teamSlug/repos --jq '.[]|.full_name'
 
 foreach ($repo in $repos) {
